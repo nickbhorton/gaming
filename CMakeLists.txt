@@ -23,12 +23,12 @@ target_include_directories(
 
 add_executable(
     main
-    main.cc
-    callbacks.cc
-    shader.cc
-    vbo.cc
-    vao.cc
-    ebo.cc
+    src/main.cc
+    src/callbacks.cc
+    src/shader.cc
+    src/vbo.cc
+    src/vao.cc
+    src/ebo.cc
 )
 target_include_directories(
     main

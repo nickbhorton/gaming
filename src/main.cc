@@ -5,7 +5,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "arrayalgebra/arrayalgebra.h"
+#include "../arrayalgebra/arrayalgebra.h"
 #include "callbacks.h"
 #include "ebo.h"
 #include "shader.h"
@@ -84,8 +84,11 @@ int main()
         glEnableVertexAttribArray(1);
 
         // Shader stuff
-        Shader vertex_shader1("../basic_vertex.glsl", GL_VERTEX_SHADER);
-        Shader fragment_shader1("../basic_fragment.glsl", GL_FRAGMENT_SHADER);
+        Shader vertex_shader1("../res/basic_vertex.glsl", GL_VERTEX_SHADER);
+        Shader fragment_shader1(
+            "../res/basic_fragment.glsl",
+            GL_FRAGMENT_SHADER
+        );
         ShaderProgram shader1(
             vertex_shader1.get_id(),
             fragment_shader1.get_id()
