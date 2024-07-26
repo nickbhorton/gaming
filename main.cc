@@ -116,6 +116,15 @@ int main()
         while (!glfwWindowShouldClose(window)) {
             process_input(window);
 
+            // Uniform stuff
+            float time = glfwGetTime();
+            float green_val = (std::sin(time) / 2.0) + 0.5;
+            int vertex_color_location =
+                glGetUniformLocation(shader1.get_id(), "vertex_color");
+            shader1.use();
+            glUniform4f(vertex_color_location, 0, green_val, 0, 1);
+
+            // Go Forth and RENDER
             glClear(GL_COLOR_BUFFER_BIT);
             vao1.bind();
             shader1.use();

@@ -62,3 +62,5 @@ ShaderProgram::ShaderProgram(
 ShaderProgram::~ShaderProgram() { glDeleteProgram(id); }
 
 void ShaderProgram::use() { glUseProgram(id); }
+
+auto ShaderProgram::get_id() const -> unsigned int { return id; }

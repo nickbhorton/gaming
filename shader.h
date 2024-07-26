@@ -18,6 +18,7 @@ class ShaderProgram
 
 public:
     void use();
+    auto get_id() const -> unsigned int;
     ShaderProgram(
         unsigned int vertex_shader_id,
         unsigned int fragment_shader_id
