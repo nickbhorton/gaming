@@ -1,3 +1,6 @@
 [submodule "glfw"]
 	path = glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "arrayalgebra"]
+	path = arrayalgebra
+	url = https://github.com/nickbhorton/arrayalgebra.git

@@ -25,6 +25,9 @@ add_executable(
     main
     main.cc
     callbacks.cc
+    shader.cc
+    vbo.cc
+    vao.cc
 )
 target_include_directories(
     main
