@@ -7,6 +7,7 @@
 
 #include "arrayalgebra/arrayalgebra.h"
 #include "callbacks.h"
+#include "ebo.h"
 #include "shader.h"
 #include "vao.h"
 #include "vbo.h"
@@ -50,8 +51,16 @@ int main()
         VAO vao{};
         vao.bind();
 
-        std::vector<aa::vec3> vertexes =
-            {{-0.5, -0.5, 0.0}, {0.5, -0.5, 0.0}, {0.0, 0.5, 0.0}};
+        std::vector<unsigned int> indicies = {0, 1, 3, 1, 2, 3};
+        EBO ebo(indicies.data(), indicies.size(), GL_STATIC_DRAW);
+        ebo.bind();
+
+        std::vector<aa::vec3> vertexes = {
+            {0.5, 0.5, 0.0},
+            {0.5, -0.5, 0.0},
+            {-0.5, -0.5, 0.0},
+            {-0.5, 0.5, 0.0}
+        };
         VBO vbo(
             (char*)vertexes.data(),
             vertexes.size() * sizeof(vertexes[0]),
@@ -79,7 +88,7 @@ int main()
             process_input(window);
 
             glClear(GL_COLOR_BUFFER_BIT);
-            glDrawArrays(GL_TRIANGLES, 0, vertexes.size());
+            glDrawElements(GL_TRIANGLES, indicies.size(), GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);
             glfwPollEvents();

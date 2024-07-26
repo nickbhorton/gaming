@@ -28,6 +28,7 @@ add_executable(
     shader.cc
     vbo.cc
     vao.cc
+    ebo.cc
 )
 target_include_directories(
     main
