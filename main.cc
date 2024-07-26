@@ -48,46 +48,80 @@ int main()
     // This scope is to prevent glfwTerminate from being called before
     // destructors which causes segfaults (i think)
     {
-        VAO vao{};
-        vao.bind();
+        VAO vao1{};
+        vao1.bind();
 
-        std::vector<unsigned int> indicies = {0, 1, 3, 1, 2, 3};
-        EBO ebo(indicies.data(), indicies.size(), GL_STATIC_DRAW);
-        ebo.bind();
-
-        std::vector<aa::vec3> vertexes = {
-            {0.5, 0.5, 0.0},
-            {0.5, -0.5, 0.0},
-            {-0.5, -0.5, 0.0},
-            {-0.5, 0.5, 0.0}
-        };
-        VBO vbo(
-            (char*)vertexes.data(),
-            vertexes.size() * sizeof(vertexes[0]),
+        std::vector<aa::vec3> vertexes1 =
+            {{-1, -1, 0.0}, {0, -1, 0.0}, {0, 0, 0.0}};
+        VBO vbo1(
+            (char*)vertexes1.data(),
+            vertexes1.size() * sizeof(vertexes1[0]),
             GL_STATIC_DRAW
         );
-        vbo.bind();
+        vbo1.bind();
+
+        std::vector<unsigned int> indicies = {0, 1, 2};
+        EBO ebo(indicies.data(), indicies.size(), GL_STATIC_DRAW);
+        ebo.bind();
 
         glVertexAttribPointer(
             0,
             3,
             GL_FLOAT,
             GL_FALSE,
-            sizeof(vertexes[0]),
+            sizeof(vertexes1[0]),
             (void*)0
         );
         glEnableVertexAttribArray(0);
 
-        Shader vertex_shader("../basic_vertex.glsl", GL_VERTEX_SHADER);
-        Shader fragment_shader("../basic_fragment.glsl", GL_FRAGMENT_SHADER);
-        ShaderProgram shader(vertex_shader.get_id(), fragment_shader.get_id());
-        shader.use();
-        vao.bind();
+        VAO vao2{};
+        vao2.bind();
+
+        std::vector<aa::vec3> vertexes2 = {{0, 0, 0.0}, {1, 1, 0}, {1, 0, 0.0}};
+        VBO vbo2(
+            (char*)vertexes2.data(),
+            vertexes2.size() * sizeof(vertexes2[0]),
+            GL_STATIC_DRAW
+        );
+        vbo2.bind();
+        ebo.bind();
+
+        glVertexAttribPointer(
+            0,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(vertexes2[0]),
+            (void*)0
+        );
+        glEnableVertexAttribArray(0);
+
+        vao2.unbind();
+
+        // Shader stuff
+        Shader vertex_shader1("../basic_vertex.glsl", GL_VERTEX_SHADER);
+        Shader fragment_shader1("../basic_fragment.glsl", GL_FRAGMENT_SHADER);
+        ShaderProgram shader1(
+            vertex_shader1.get_id(),
+            fragment_shader1.get_id()
+        );
+
+        Shader vertex_shader2("../basic_vertex.glsl", GL_VERTEX_SHADER);
+        Shader fragment_shader2("../basic_fragment2.glsl", GL_FRAGMENT_SHADER);
+        ShaderProgram shader2(
+            vertex_shader2.get_id(),
+            fragment_shader2.get_id()
+        );
 
         while (!glfwWindowShouldClose(window)) {
             process_input(window);
 
             glClear(GL_COLOR_BUFFER_BIT);
+            vao1.bind();
+            shader1.use();
+            glDrawElements(GL_TRIANGLES, indicies.size(), GL_UNSIGNED_INT, 0);
+            vao2.bind();
+            shader2.use();
             glDrawElements(GL_TRIANGLES, indicies.size(), GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);
