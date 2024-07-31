@@ -1,9 +1,13 @@
+#include "texture.h"
 #include <iostream>
 #include <vector>
 
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 #include "../arrayalgebra/arrayalgebra.h"
 #include "callbacks.h"
@@ -26,7 +30,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "openGL", NULL, NULL);
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -51,8 +55,16 @@ int main()
         VAO vao{};
         vao.bind();
 
-        std::vector<std::array<float, 6>> vertexes =
-            {{-1, -1, 0, 1, 0, 0}, {0, -1, 0, 0, 1, 0}, {0, 0, 0, 0, 0, 1}};
+        Texture texture(
+            "../res/mctexture/assets/minecraft/textures/block/dirt.png"
+        );
+
+        std::vector<std::array<float, 8>> vertexes = {
+            {0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f},   // top right
+            {0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f},  // bottom right
+            {-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f}, // bottom left
+            {-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f}   // top left
+        };
         VBO vbo(
             (char*)vertexes.data(),
             vertexes.size() * sizeof(vertexes[0]),
@@ -60,7 +72,7 @@ int main()
         );
         vbo.bind();
 
-        std::vector<unsigned int> indicies = {0, 1, 2};
+        std::vector<unsigned int> indicies = {0, 1, 2, 0, 3, 2};
         EBO ebo(indicies.data(), indicies.size(), GL_STATIC_DRAW);
         ebo.bind();
 
@@ -82,7 +94,15 @@ int main()
             (void*)(3 * sizeof(float))
         );
         glEnableVertexAttribArray(1);
-
+        glVertexAttribPointer(
+            2,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(vertexes[0]),
+            (void*)(6 * sizeof(float))
+        );
+        glEnableVertexAttribArray(2);
         // Shader stuff
         Shader vertex_shader1("../res/basic_vertex.glsl", GL_VERTEX_SHADER);
         Shader fragment_shader1(
@@ -94,13 +114,20 @@ int main()
             fragment_shader1.get_id()
         );
 
+        glTexParameteri(
+            GL_TEXTURE_2D,
+            GL_TEXTURE_MIN_FILTER,
+            GL_LINEAR_MIPMAP_LINEAR
+        );
+
         while (!glfwWindowShouldClose(window)) {
             process_input(window);
 
             // Go Forth and RENDER
             glClear(GL_COLOR_BUFFER_BIT);
-            vao.bind();
             shader1.use();
+            texture.bind();
+            vao.bind();
             glDrawElements(GL_TRIANGLES, indicies.size(), GL_UNSIGNED_INT, 0);
 
             glfwSwapBuffers(window);

@@ -9,6 +9,7 @@ class Shader
 
 public:
     auto get_id() const -> unsigned int;
+    void set_float(std::string const& name, float value);
     Shader(std::string const& filename, unsigned int shader_type);
 };
 

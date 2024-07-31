@@ -29,11 +29,13 @@ add_executable(
     src/vbo.cc
     src/vao.cc
     src/ebo.cc
+    src/texture.cc
 )
 target_include_directories(
     main
     PUBLIC
     glad/include
+    stb
 )
 target_link_libraries(
     main

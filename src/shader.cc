@@ -37,6 +37,11 @@ Shader::Shader(std::string const& filename, unsigned int shader_type)
 
 auto Shader::get_id() const -> unsigned int { return id; }
 
+void Shader::set_float(std::string const& name, float value)
+{
+    glUniform1f(glGetUniformLocation(id, name.c_str()), value);
+}
+
 // This deletes the vertex and fragment shaders because deconstructors are
 // funky. Be careful
 ShaderProgram::ShaderProgram(
