@@ -3,3 +3,4 @@ build
 compile_commands.json
 .cache
 glad/src/glad.c
+res/mctexture
