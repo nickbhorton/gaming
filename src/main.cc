@@ -7,7 +7,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-// #include "../arrayalgebra/arrayalgebra.h"
+#include "../arrayalgebra/arrayalgebra.h"
 #include "callbacks.h"
 #include "ebo.h"
 #include "glfw_wrapper.h"
@@ -104,6 +104,26 @@ int main()
         GL_LINEAR_MIPMAP_NEAREST
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    aa::mat4 const transform = {
+        {{(float)1078 / (float)1918, 0, 0, 0},
+         {0, 1, 0, 0},
+         {0, 0, 1, 0},
+         {0, 0, 0, 1}}
+    };
+    ;
+    shader.use();
+    unsigned int transform_location =
+        glGetUniformLocation(shader.get_id(), "transform");
+
+    // this is sketchy and depends on imlementation of aa::mat4 and std array
+    // but for now works
+    glUniformMatrix4fv(
+        transform_location,
+        1,
+        GL_TRUE,
+        (const float*)&transform
+    );
 
     while (!glfwWindowShouldClose(glfw.get_window())) {
         process_input(glfw.get_window());

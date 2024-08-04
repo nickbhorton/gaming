@@ -6,8 +6,10 @@ layout (location = 2) in vec2 uv;
 out vec3 color;
 out vec2 uv_coords;
 
+uniform mat4 transform;
+
 void main() {
-    gl_Position = vec4(pos, 1.0);
+    gl_Position = transform * vec4(pos, 1.0);
     color = col;
     uv_coords = uv;
 }
