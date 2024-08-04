@@ -30,6 +30,7 @@ add_executable(
     src/vao.cc
     src/ebo.cc
     src/texture.cc
+    src/glfw_wrapper.cc
 )
 target_include_directories(
     main
