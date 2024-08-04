@@ -46,6 +46,7 @@ int main()
 
     int constexpr default_window_width = 800;
     int constexpr default_window_height = 600;
+    std::flush(std::cout);
     glViewport(0, 0, default_window_width, default_window_height);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -55,9 +56,7 @@ int main()
         VAO vao{};
         vao.bind();
 
-        Texture texture(
-            "../res/mctexture/assets/minecraft/textures/block/dirt.png"
-        );
+        Texture texture("../res/dirt.png");
 
         std::vector<std::array<float, 8>> vertexes = {
             {0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f},   // top right

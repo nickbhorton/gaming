@@ -12,9 +12,9 @@ Texture::Texture(std::string const& filename)
     unsigned char* img_data =
         stbi_load(filename.c_str(), &width, &height, &num_channels, 0);
     if (img_data) {
-        std::cout << "width: " << width << "\n";
-        std::cout << "height: " << height << "\n";
-        std::cout << "channels: " << num_channels << "\n";
+        // std::cout << "width: " << width << "\n";
+        // std::cout << "height: " << height << "\n";
+        // std::cout << "channels: " << num_channels << "\n";
         glBindTexture(GL_TEXTURE_2D, id);
         glTexImage2D(
             GL_TEXTURE_2D,
