@@ -9,7 +9,6 @@
 
 #include "../arrayalgebra/arrayalgebra.h"
 #include "callbacks.h"
-#include "ebo.h"
 #include "glfw_wrapper.h"
 #include "shader.h"
 #include "texture.h"
@@ -21,6 +20,18 @@ void process_input(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+}
+
+void vertex_push(
+    std::vector<std::array<float, 8>>& vertexes,
+    aa::vec3 pos,
+    aa::vec2 uv,
+    aa::vec3 color
+)
+{
+    vertexes.push_back(
+        {pos[0], pos[1], pos[2], color[0], color[1], color[2], uv[0], uv[1]}
+    );
 }
 
 int main()
@@ -46,12 +57,39 @@ int main()
     VAO vao{};
     vao.bind();
 
-    std::vector<std::array<float, 8>> vertexes = {
-        {0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f},   // top right
-        {0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f},  // bottom right
-        {-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f}, // bottom left
-        {-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f}   // top left
+    std::vector<aa::vec3> vertex_positions = {
+        {1, 1, 1},
+        {1, 1, -1},
+        {1, -1, 1},
+        {1, -1, -1},
+        {-1, 1, 1},
+        {-1, 1, -1},
+        {-1, -1, 1},
+        {-1, -1, -1},
     };
+
+    aa::vec3 color1 = {1, 1, 1};
+    aa::vec3 color2 = {1, 0, 0};
+
+    aa::vec2 uv_bl = {0, 0};
+    aa::vec2 uv_br = {1, 0};
+    aa::vec2 uv_tl = {0, 1};
+    aa::vec2 uv_tr = {1, 1};
+
+    std::vector<std::array<float, 8>> vertexes{};
+    vertex_push(vertexes, {-1, -1, 1}, uv_bl, color1);
+    vertex_push(vertexes, {1, 1, 1}, uv_tr, color1);
+    vertex_push(vertexes, {1, -1, 1}, uv_br, color1);
+    vertex_push(vertexes, {-1, -1, 1}, uv_bl, color1);
+    vertex_push(vertexes, {-1, 1, 1}, uv_tl, color1);
+    vertex_push(vertexes, {1, 1, 1}, uv_tr, color1);
+
+    vertex_push(vertexes, {-1, 1, -1}, uv_bl, color2);
+    vertex_push(vertexes, {1, 1, 1}, uv_tr, color2);
+    vertex_push(vertexes, {1, 1, -1}, uv_br, color2);
+    vertex_push(vertexes, {-1, 1, -1}, uv_bl, color2);
+    vertex_push(vertexes, {-1, 1, 1}, uv_tl, color2);
+    vertex_push(vertexes, {1, 1, 1}, uv_tr, color2);
 
     VBO vbo(
         (char*)vertexes.data(),
@@ -59,10 +97,6 @@ int main()
         GL_STATIC_DRAW
     );
     vbo.bind();
-
-    std::vector<unsigned int> indicies = {0, 1, 2, 0, 3, 2};
-    EBO ebo(indicies.data(), indicies.size(), GL_STATIC_DRAW);
-    ebo.bind();
 
     glVertexAttribPointer(
         0,
@@ -105,13 +139,26 @@ int main()
     );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    aa::mat4 const transform = {
+    aa::mat4 const screen = {
         {{(float)1078 / (float)1918, 0, 0, 0},
          {0, 1, 0, 0},
          {0, 0, 1, 0},
          {0, 0, 0, 1}}
     };
-    ;
+
+    aa::vec3 const cube_pos{0, 0, -5};
+    aa::mat4 const model = {
+        {{1, 0, 0, -cube_pos[0]},
+         {0, 1, 0, -cube_pos[1]},
+         {0, 0, 1, -cube_pos[2]},
+         {0, 0, 0, 1}}
+    };
+    aa::mat4 const view = {
+        {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}
+    };
+
+    aa::mat4 transform = screen * view * model;
+
     shader.use();
     unsigned int transform_location =
         glGetUniformLocation(shader.get_id(), "transform");
@@ -121,7 +168,7 @@ int main()
     glUniformMatrix4fv(
         transform_location,
         1,
-        GL_TRUE,
+        GL_FALSE,
         (const float*)&transform
     );
 
@@ -133,7 +180,7 @@ int main()
         shader.use();
         texture.bind();
         vao.bind();
-        glDrawElements(GL_TRIANGLES, indicies.size(), GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, vertexes.size());
 
         glfwSwapBuffers(glfw.get_window());
         glfwPollEvents();
