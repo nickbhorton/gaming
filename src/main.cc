@@ -15,11 +15,27 @@
 #include "vao.h"
 #include "vbo.h"
 
+aa::vec3 camera_pos{0, 0, 10};
+aa::vec3 const camera_dir{0, 0, -1};
+aa::vec3 const camera_up{0, 1, 0};
+aa::vec3 const camera_right{aa::cross(camera_dir, camera_up)};
+
 void process_input(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+    float const cameraSpeed = 0.05f; // adjust accordingly
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera_pos = camera_pos + cameraSpeed * camera_dir;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera_pos = camera_pos - cameraSpeed * camera_dir;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera_pos = camera_pos - aa::normalize(aa::cross(camera_dir, camera_up)
+                                  ) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera_pos = camera_pos + aa::normalize(aa::cross(camera_dir, camera_up)
+                                  ) * cameraSpeed;
 }
 
 void vertex_push(
@@ -53,6 +69,7 @@ int main()
 
     glViewport(0, 0, default_window_width, default_window_height);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
 
     VAO vao{};
     vao.bind();
@@ -84,12 +101,14 @@ int main()
     vertex_push(vertexes, {-1, 1, 1}, uv_tl, color1);
     vertex_push(vertexes, {1, 1, 1}, uv_tr, color1);
 
+    /*
     vertex_push(vertexes, {-1, 1, -1}, uv_bl, color2);
     vertex_push(vertexes, {1, 1, 1}, uv_tr, color2);
     vertex_push(vertexes, {1, 1, -1}, uv_br, color2);
     vertex_push(vertexes, {-1, 1, -1}, uv_bl, color2);
     vertex_push(vertexes, {-1, 1, 1}, uv_tl, color2);
     vertex_push(vertexes, {1, 1, 1}, uv_tr, color2);
+    */
 
     VBO vbo(
         (char*)vertexes.data(),
@@ -146,38 +165,63 @@ int main()
          {0, 0, 0, 1}}
     };
 
-    aa::vec3 const cube_pos{0, 0, -5};
+    std::cout << camera_right << "\n";
+
+    aa::vec3 const cube_pos{0, 0, 0};
+
     aa::mat4 const model = {
-        {{1, 0, 0, -cube_pos[0]},
-         {0, 1, 0, -cube_pos[1]},
-         {0, 0, 1, -cube_pos[2]},
+        {{1, 0, 0, cube_pos[0]},
+         {0, 1, 0, cube_pos[1]},
+         {0, 0, 1, cube_pos[2]},
          {0, 0, 0, 1}}
     };
     aa::mat4 const view = {
-        {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}
+        {{camera_right[0], camera_right[1], camera_right[2], 0},
+         {camera_up[0], camera_up[1], camera_up[2], 0},
+         {camera_dir[0], camera_dir[1], camera_dir[2], 0},
+         {0, 0, 0, 1}}
     };
-
-    aa::mat4 transform = screen * view * model;
+    float const n = 0.1;
+    float const f = 100;
+    float const r = 1;
+    float const l = -1;
+    float const t = 1;
+    float const b = -1;
+    aa::mat4 const projection = {
+        {{2.0f * n / (r - l), 0, (r + l) / (r - l), 0},
+         {0, 2.0f * n / (t - b), (t + b) / (t - b), 0},
+         {0, 0, -(f + n) / (f - n), -2.0f * f * n / (f - n)},
+         {0, 0, -1, 0}}
+    };
 
     shader.use();
     unsigned int transform_location =
         glGetUniformLocation(shader.get_id(), "transform");
 
-    // this is sketchy and depends on imlementation of aa::mat4 and std array
-    // but for now works
-    glUniformMatrix4fv(
-        transform_location,
-        1,
-        GL_FALSE,
-        (const float*)&transform
-    );
-
     while (!glfwWindowShouldClose(glfw.get_window())) {
         process_input(glfw.get_window());
 
         // Go Forth and RENDER
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader.use();
+        aa::mat4 const cpos = {
+            {{1, 0, 0, -camera_pos[0]},
+             {0, 1, 0, -camera_pos[1]},
+             {0, 0, 1, -camera_pos[2]},
+             {0, 0, 0, 1}}
+        };
+
+        aa::mat4 transform = screen * projection * view * cpos * model;
+
+        // this is sketchy and depends on imlementation of aa::mat4 and std
+        // array but for now works
+        glUniformMatrix4fv(
+            transform_location,
+            1,
+            GL_FALSE,
+            (const float*)&transform
+        );
+
         texture.bind();
         vao.bind();
         glDrawArrays(GL_TRIANGLES, 0, vertexes.size());
